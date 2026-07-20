@@ -5,91 +5,126 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Editor A4 PWA - Guías Horizontales</title>
   <link rel="manifest" href="manifest.json">
-  <style>
-    body {
-      background-color: #e9ecef;
-      font-family: system-ui, -apple-system, sans-serif;
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    
-    .toolbar {
-      background: white;
-      padding: 12px 24px;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-      margin-bottom: 20px;
-      display: flex;
-      gap: 15px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+<style>
+  /* Reset global de box-sizing para evitar que los bordes aumenten el tamaño */
+  *, *:before, *:after {
+    box-sizing: border-box;
+  }
 
-    button, select {
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      cursor: pointer;
-    }
+  body {
+    background-color: #e9ecef;
+    font-family: system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .toolbar {
+    background: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
 
-    button {
-      background-color: #0066cc;
-      color: white;
-      border: none;
-      font-weight: 500;
-    }
+  button, select {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    cursor: pointer;
+  }
 
-    button:hover { background-color: #0052a3; }
-    
-    /* Hoja A4 */
-    .a4-page {
+  button {
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    font-weight: 500;
+  }
+
+  /* Hoja A4 */
+  .a4-page {
+    width: 210mm;
+    height: 297mm;
+    background: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    display: grid;
+    grid-template-columns: 1fr;
+    overflow: hidden; /* CRÍTICO: Evita que desbordes milimétricos creen una 2da página */
+  }
+
+  /* Filas con líneas guía horizontales */
+  .seccion {
+    border-bottom: 1.5px dashed #4a90e2;
+    padding: 10px;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .seccion:last-child {
+    border-bottom: none; /* Asegura que la última sección no sume borde inferior */
+  }
+  
+  .seccion textarea {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    font-size: 15px;
+    line-height: 1.4;
+    font-family: inherit;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* REGLAS EXCLUSIVAS DE IMPRESIÓN */
+  @page {
+    size: A4 portrait;
+    margin: 0; /* Elimina los márgenes del controlador de impresión */
+  }
+
+  @media print {
+    html, body {
       width: 210mm;
       height: 297mm;
+      margin: 0 !important;
+      padding: 0 !important;
       background: white;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
-      display: grid;
-      grid-template-columns: 1fr; /* Una sola columna */
-      box-sizing: border-box;
+      overflow: hidden;
     }
 
-    /* Filas con líneas guía horizontales */
+    .toolbar {
+      display: none !important;
+    }
+
+    .a4-page {
+      box-shadow: none;
+      margin: 0;
+      width: 210mm;
+      height: 297mm;
+      page-break-after: avoid; /* Previene saltos de página forzados */
+      page-break-inside: avoid;
+    }
+
     .seccion {
-      border-bottom: 1.5px dashed #4a90e2; /* Línea horizontal */
-      padding: 15px;
-      box-sizing: border-box;
-      display: flex;
+      border-bottom: 1px dashed #ccc;
     }
 
     .seccion:last-child {
       border-bottom: none;
     }
+  }
+</style>
     
-    .seccion textarea {
-      width: 100%;
-      height: 100%;
-      border: none;
-      outline: none;
-      resize: none;
-      font-size: 15px;
-      line-height: 1.5;
-      font-family: inherit;
-      background: transparent;
-    }
 
-    /* Opciones de impresión */
-    @media print {
-      body { padding: 0; background: white; }
-      .toolbar { display: none; }
-      .a4-page { box-shadow: none; margin: 0; width: 210mm; height: 297mm; }
-      
-      /* Si no deseas que las líneas punteadas se impriman, cambia a 'none' */
-      .seccion { border-bottom: 1px dashed #ccc; } 
-    }
-  </style>
 </head>
 <body>
 
