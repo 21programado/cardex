@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Editor A4 PWA - Guías Horizontales</title>
   <link rel="manifest" href="manifest.json">
+
 <style>
-  /* Reset global de box-sizing para evitar que los bordes aumenten el tamaño */
   *, *:before, *:after {
     box-sizing: border-box;
   }
@@ -48,7 +48,7 @@
     font-weight: 500;
   }
 
-  /* Hoja A4 */
+  /* Hoja A4 en pantalla */
   .a4-page {
     width: 210mm;
     height: 297mm;
@@ -56,19 +56,22 @@
     box-shadow: 0 0 20px rgba(0,0,0,0.1);
     display: grid;
     grid-template-columns: 1fr;
-    overflow: hidden; /* CRÍTICO: Evita que desbordes milimétricos creen una 2da página */
+    overflow: hidden;
+    /* Margen interno seguro de 12mm alrededor de toda la hoja */
+    padding: 12mm 15mm;
   }
 
   /* Filas con líneas guía horizontales */
   .seccion {
     border-bottom: 1.5px dashed #4a90e2;
-    padding: 10px;
+    padding: 8px 5px;
     display: flex;
     overflow: hidden;
+    box-sizing: border-box;
   }
 
   .seccion:last-child {
-    border-bottom: none; /* Asegura que la última sección no sume borde inferior */
+    border-bottom: none;
   }
   
   .seccion textarea {
@@ -81,14 +84,15 @@
     line-height: 1.4;
     font-family: inherit;
     background: transparent;
-    padding: 0;
+    padding: 4px 8px; /* Sangría interna para que el texto no pegue a la izquierda */
     margin: 0;
+    box-sizing: border-box;
   }
 
   /* REGLAS EXCLUSIVAS DE IMPRESIÓN */
   @page {
     size: A4 portrait;
-    margin: 0; /* Elimina los márgenes del controlador de impresión */
+    margin: 0; 
   }
 
   @media print {
@@ -99,6 +103,8 @@
       padding: 0 !important;
       background: white;
       overflow: hidden;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     .toolbar {
@@ -110,7 +116,9 @@
       margin: 0;
       width: 210mm;
       height: 297mm;
-      page-break-after: avoid; /* Previene saltos de página forzados */
+      /* Mantiene los márgenes de seguridad en la impresión física */
+      padding: 12mm 15mm !important;
+      page-break-after: avoid;
       page-break-inside: avoid;
     }
 
@@ -120,6 +128,13 @@
 
     .seccion:last-child {
       border-bottom: none;
+    }
+
+    /* Garantiza que la tipografía se renderice nítida al imprimir */
+    .seccion textarea {
+      padding: 4px 8px !important;
+      font-size: 14px;
+      color: #000 !important;
     }
   }
 </style>
