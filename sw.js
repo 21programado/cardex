@@ -1,36 +1,51 @@
-const CACHE_NAME = 'a4-editor-v2';
+const CACHE_NAME = 'a4-editor-v4';
 
-// 1. Incluimos la raíz del sitio y los dos íconos obligatorios
+// Rutas sin el './' para evitar problemas de resolución de rutas en Vercel
 const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  '/',
+  'index.html',
+  'manifest.json',
+  'icon-192.png',
+  'icon-512.png'
 ];
 
-// Instalación y guardado en caché
+// Instalación: Guarda los recursos clave en la caché
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
+    })
   );
-  // Fuerza al Service Worker a activarse de inmediato sin esperar a cerrar la pestaña
+  // Activa el nuevo Service Worker de inmediato sin esperar a cerrar la pestaña
   self.skipWaiting();
 });
 
-// Activación y limpieza
+// Activación: Toma el control y limpia cachés antiguas si cambias la versión
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    // Toma el control inmediato de todos los clientes/pestañas abiertas
-    self.clients.claim()
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(() => {
+      // Toma el control inmediato de todas las ventanas/pestañas abiertas
+      return self.clients.claim();
+    })
   );
 });
 
-// Estrategia de respuesta (Caché primero, luego red)
+// Estrategia de respuesta: Intenta servir desde la caché, si no, busca en la red
 self.addEventListener('fetch', (e) => {
   e.respondWith(
-    caches.match(e.request).then((res) => {
-      return res || fetch(e.request);
+    caches.match(e.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(e.request);
     })
   );
 });
