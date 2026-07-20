@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor A4 PWA - Guías Horizontales</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body {
+      background-color: #e9ecef;
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .toolbar {
+      background: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    button, select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button {
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      font-weight: 500;
+    }
+
+    button:hover { background-color: #0052a3; }
+    
+    /* Hoja A4 */
+    .a4-page {
+      width: 210mm;
+      height: 297mm;
+      background: white;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      display: grid;
+      grid-template-columns: 1fr; /* Una sola columna */
+      box-sizing: border-box;
+    }
+
+    /* Filas con líneas guía horizontales */
+    .seccion {
+      border-bottom: 1.5px dashed #4a90e2; /* Línea horizontal */
+      padding: 15px;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .seccion:last-child {
+      border-bottom: none;
+    }
+    
+    .seccion textarea {
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 15px;
+      line-height: 1.5;
+      font-family: inherit;
+      background: transparent;
+    }
+
+    /* Opciones de impresión */
+    @media print {
+      body { padding: 0; background: white; }
+      .toolbar { display: none; }
+      .a4-page { box-shadow: none; margin: 0; width: 210mm; height: 297mm; }
+      
+      /* Si no deseas que las líneas punteadas se impriman, cambia a 'none' */
+      .seccion { border-bottom: 1px dashed #ccc; } 
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <label for="divisionsSelect">Divisiones horizontales: </label>
+    <select id="divisionsSelect">
+      <option value="1">1 (Sin líneas)</option>
+      <option value="2">2 Filas (Mitades)</option>
+      <option value="3">3 Filas (Tércios)</option>
+      <option value="4">4 Filas</option>
+      <option value="5">5 Filas</option>
+      <option value="6">6 Filas</option>
+    </select>
+
+    <button id="btnSave">Guardar (.txt)</button>
+    <button onclick="window.print()">Imprimir</button>
+  </div>
+
+  <div class="a4-page" id="paper"></div>
+
+  <script>
+    const paper = document.getElementById('paper');
+    const select = document.getElementById('divisionsSelect');
+
+    function renderSections(count) {
+      paper.innerHTML = '';
+      // Divide el alto proporcionalmente en N filas horizontales
+      paper.style.gridTemplateRows = `repeat(${count}, 1fr)`;
+
+      for (let i = 0; i < count; i++) {
+        const sec = document.createElement('div');
+        sec.className = 'seccion';
+        sec.innerHTML = `<textarea placeholder="Escribe en el bloque horizontal ${i + 1}..."></textarea>`;
+        paper.appendChild(sec);
+      }
+    }
+
+    select.addEventListener('change', (e) => renderSections(e.target.value));
+    
+    // Inicializar
+    renderSections(1);
+
+    // Exportar texto respetando los bloques horizontales
+    document.getElementById('btnSave').addEventListener('click', () => {
+      const textareas = document.querySelectorAll('.seccion textarea');
+      let textContent = '';
+      textareas.forEach((ta, index) => {
+        textContent += `=== BLOQUE HORIZONTAL ${index + 1} ===\n` + ta.value + '\n\n';
+      });
+
+      const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'hoja_a4_subdividida.txt';
+      link.click();
+    });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
