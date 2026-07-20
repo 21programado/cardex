@@ -1,4 +1,4 @@
-const CACHE_NAME = 'a4-editor-v4';
+const CACHE_NAME = 'a4-editor-v5';
 
 // Rutas sin el './' para evitar problemas de resolución de rutas en Vercel
 const ASSETS = [
